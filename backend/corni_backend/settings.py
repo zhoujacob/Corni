@@ -38,10 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "django.contrib.messages",  # Need for Auth messages
-    "django_google_sso",  # Add django_google_sso
     'rest_framework',
     'users', 
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
