@@ -33,6 +33,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -123,6 +124,11 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
 
 GOOGLE_SSO_CLIENT_ID = config('GOOGLE_SSO_CLIENT_ID')
 GOOGLE_SSO_CLIENT_SECRET = config('GOOGLE_SSO_CLIENT_SECRET')
