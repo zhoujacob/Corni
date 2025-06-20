@@ -7,6 +7,7 @@ def root_view(request):
 
 urlpatterns = [
     path('', root_view),
+    path('admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
     
 ]
