@@ -50,7 +50,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     --> objects registers CustomUserManager as the default manager
     --> Enables calls like CustomUser.bojects.create_user(...)
     """
-    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     google_id = models.CharField(max_length=255, unique=True, blank=True, null=True)
     first_name = models.CharField(max_length=100)

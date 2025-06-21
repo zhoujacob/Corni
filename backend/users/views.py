@@ -18,7 +18,6 @@ class GoogleLoginView(APIView):
         token = request.data.get('token')
         if not token:
             return Response({'error': 'no token'}, status=400)
-
         # verify with Google
         resp = requests.get(
             f'https://oauth2.googleapis.com/tokeninfo?id_token={token}'
@@ -27,7 +26,7 @@ class GoogleLoginView(APIView):
             return Response({'error': 'invalid token'}, status=400)
         
         data = resp.json()
-
+        
         email = data['email']
         google_id = data.get("sub")
         first_name = data.get("given_name", "")

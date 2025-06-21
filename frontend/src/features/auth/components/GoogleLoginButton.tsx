@@ -15,6 +15,12 @@ const GoogleLoginButton = () => {
           body: JSON.stringify({ token: idToken }),
         });
 
+        if (!res.ok) {
+          const errorText = await res.text();
+          console.error('Server error:', errorText);
+          return;
+        }
+
         const data = await res.json();
         setAccessToken(data.access);
         console.log('Django tokens:', data);
