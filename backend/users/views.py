@@ -1,10 +1,12 @@
 import requests
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from rest_framework.views import APIView
+from rest_framework.views import APIView, status
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import serializers
+
 from users.models import CustomUser
 from typing import cast
 
@@ -56,3 +58,22 @@ class GoogleLoginView(APIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
         })
+    
+class UserSerializer(serializers.ModelSerializer):
+    """
+    Controls exactly which User fields will be turned into JSON
+    and sent to the front end.
+    """
+    class Meta:
+        model  = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+class MeView(APIView):
+    """
+    Endpoint to return the currently‐authenticated user.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response(UserSerializer(request.user).data,
+                        status=status.HTTP_200_OK)
