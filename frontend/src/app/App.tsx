@@ -4,6 +4,7 @@ import LoginPage from '../pages/LoginPage';
 import RequireAuth from '../shared/RequireAuth';
 import DashboardPage from '../pages/DashboardPage';
 import Navbar from '../shared/Navbar';
+import { ROUTES } from './routes/path';
 
 
 function App() {
@@ -12,9 +13,9 @@ function App() {
     <>
     {accessToken && <Navbar />}
     <Routes>
-        <Route path="/" element={<LoginPage />} />
+        <Route path={ROUTES.LOGIN} element={<LoginPage />} />
         <Route
-          path="/dashboard"
+          path={ROUTES.DASHBOARD}
           element={
             <RequireAuth>
               <DashboardPage />

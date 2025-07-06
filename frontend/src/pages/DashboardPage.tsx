@@ -1,5 +1,6 @@
 import { useAuth } from "../features/auth/AuthContext";
 import DashboardCard from "../shared/DashboardCard";
+import { ROUTES } from "../app/routes/path";
 import styles from './DashboardPage.module.css';
 
 export default function DashboardPage() {

@@ -1,13 +1,14 @@
 import { useAuth } from '../features/auth/AuthContext'
 import GoogleLoginButton from '../features/auth/components/GoogleLoginButton'
 import { Navigate } from 'react-router-dom'
+import { ROUTES } from '../app/routes/path'
 
 export default function LoginPage() {
   const { accessToken } = useAuth()
 
   // If already logged in, redirect to dashboard
   if (accessToken) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={ROUTES.DASHBOARD} replace />;
   }
 
   return (
