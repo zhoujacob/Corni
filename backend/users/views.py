@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import serializers
+from .serializers import UserSerializer
+
 
 from users.models import CustomUser
 from typing import cast
@@ -58,15 +60,6 @@ class GoogleLoginView(APIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
         })
-    
-class UserSerializer(serializers.ModelSerializer):
-    """
-    Controls exactly which User fields will be turned into JSON
-    and sent to the front end.
-    """
-    class Meta:
-        model  = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name']
 
 class MeView(APIView):
     """
