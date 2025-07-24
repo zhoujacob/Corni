@@ -20,13 +20,13 @@ export async function googleLogin(idToken: string): Promise<{ access: string; re
 export async function fetchUserProfile(token: string): Promise<User> {
   const res = await fetch(`${BASE_URL}/api/auth/me/`, {
     headers: {
-      Authorization: `Bearer ${token}`,
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
   });
 
   if (!res.ok) {
     const error = await res.text();
-    console.error('Failed to fetch user profile:', error);
     throw new Error(error);
   }
 

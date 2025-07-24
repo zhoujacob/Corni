@@ -23,6 +23,11 @@ function App() {
           }
         />
       </Routes>
+      <footer style={{ textAlign: 'center', padding: '1rem', fontSize: '0.9rem' }}>
+        <p>
+          This product uses the <a href="https://www.themoviedb.org" target="_blank" rel="noreferrer">TMDB API</a> but is not endorsed or certified by TMDB.
+        </p>
+      </footer>
     </>
   );
 }
