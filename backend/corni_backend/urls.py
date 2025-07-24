@@ -9,5 +9,5 @@ urlpatterns = [
     path('', root_view),
     path('admin/', admin.site.urls),
     path('api/auth/', include('users.urls')),
-    
+    path('api/movies/', include('movies.urls')),
 ]

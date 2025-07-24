@@ -1,23 +1,9 @@
 from pathlib import Path
 from decouple import config
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-nhp5&lp%8@1h5pjjzqsnpb)h6vj7q9_jbjmm2d$78l)21$*-#%'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
-
-# Application definition
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,8 +14,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist', 
+    'corsheaders',
     'users', 
-    "corsheaders",
+    'movies',
+    
 ]
 
 MIDDLEWARE = [
@@ -62,20 +50,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'corni_backend.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
-
-# Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -92,30 +72,15 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
-
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# tell DRF to use JWT
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -129,10 +94,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
 
-
 GOOGLE_SSO_CLIENT_ID = config('GOOGLE_SSO_CLIENT_ID')
 GOOGLE_SSO_CLIENT_SECRET = config('GOOGLE_SSO_CLIENT_SECRET')
 GOOGLE_SSO_PROJECT_ID = config('GOOGLE_SSO_PROJECT_ID')
+TMDB_ACCESS_TOKEN = config('TMDB_ACCESS_TOKEN')
+TMDB_API_KEY = config('TMDB_API_KEY')
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
