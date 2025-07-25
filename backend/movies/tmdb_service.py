@@ -9,8 +9,15 @@ tmdb.debug = True
 
 tmdb_movie = TMDbMovie()
 
+def fetch_movies_from_tmdb(query: str):
+    """
+    Just fetch results from TMDb (no DB write)
+    """
+    return tmdb_movie.search(query)
+
+
 def fetch_and_store_movies(query: str):
-    results = tmdb_movie.search(query)
+    results = fetch_movies_from_tmdb(query)
     
     for r in results:
         release_year = None 
@@ -28,4 +35,3 @@ def fetch_and_store_movies(query: str):
                 "release_year": release_year,
             }
         )
-
