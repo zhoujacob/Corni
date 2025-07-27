@@ -20,7 +20,7 @@ export default function DashboardPage() {
         <DashboardCard title="My Groups">
           <p>View and manage your movie groups.</p>
         </DashboardCard>
-        <Link to={ROUTES.MY_MOVIES}>
+        <Link to={ROUTES.MY_MOVIES} className={styles.cleanLink}>
           <DashboardCard title="My Movies">
             <p>Rate or review movies you've watched.</p>
           </DashboardCard>
