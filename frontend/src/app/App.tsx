@@ -1,10 +1,13 @@
 import { Routes, Route } from 'react-router';
 import { useAuth } from '../features/auth/AuthContext';
-import LoginPage from '../pages/LoginPage';
 import RequireAuth from '../shared/RequireAuth';
-import DashboardPage from '../pages/DashboardPage';
 import Navbar from '../shared/Navbar';
+
 import { ROUTES } from './routes/path';
+
+import LoginPage from '../pages/LoginPage';
+import DashboardPage from '../pages/DashboardPage';
+import MovieDetailsPage from '../pages/MovieDetails';
 
 
 function App() {
@@ -19,6 +22,14 @@ function App() {
           element={
             <RequireAuth>
               <DashboardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={ROUTES.MY_MOVIES}
+          element={
+            <RequireAuth>
+              <MovieDetailsPage />
             </RequireAuth>
           }
         />

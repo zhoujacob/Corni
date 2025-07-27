@@ -44,7 +44,6 @@ class MovieAddView(APIView):
 
         return Response(MovieSerializer(obj).data, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
 
-
 class MovieViewSet(viewsets.ReadOnlyModelViewSet):
     """
     List and retrieve movies from our local cache.

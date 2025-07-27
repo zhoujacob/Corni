@@ -10,8 +10,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null)
 
+  const isMock = import.meta.env.VITE_MOCK_AUTH === 'true';
+
   // Whenever we get a new token, fetch the profile
   useEffect(() => {
+    // Local Testing
+    if (isMock) {
+      const mockUser: User = {
+        id: 1,
+        username: "mockuser",
+        email: "mockuser@example.com",
+        first_name: "Mocky",
+        last_name: "Tester",
+      };
+      setUser(mockUser);
+      setAccessToken("mock-token");
+      return;
+    }
+
+    // Real Auth
     if (!accessToken) {
       setUser(null);
       return;
@@ -23,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setAccessToken(null);
         setUser(null);
       });
-  }, [accessToken]);
+  }, [accessToken, isMock]);
   console.log(user)
 
   return (
