@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets, permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import status, viewsets
 from .tmdb_service import fetch_movie_by_id, serialize_tmdb_movie, fetch_movies_from_tmdb
 from .models import Movie
 from .serializers import MovieSerializer
@@ -24,6 +23,16 @@ class MovieAddView(APIView):
             tmdb_id = int(tmdb_id)
         except ValueError:
             return Response({"detail": "tmdb_id must be an integer."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Check local DB first
+        try:
+            movie = Movie.objects.get(tmdb_id=tmdb_id)
+            return Response({
+                "source": "local",
+                "movie": MovieSerializer(movie).data
+            }, status=status.HTTP_200_OK)
+        except Movie.DoesNotExist:
+            pass
 
         movie = fetch_movie_by_id(tmdb_id)
         movie_data = serialize_tmdb_movie(movie)
@@ -53,6 +62,13 @@ class TMDbPreviewView(APIView):
         if not q:
             return Response({"detail": "Query param `q` is required."}, status=status.HTTP_400_BAD_REQUEST)
 
+        local_matches = Movie.objects.filter(title__icontains=q).order_by("-last_synced")
+        if local_matches.exists():
+            return Response({
+                "source": "local",
+                "results": MovieSerializer(local_matches, many=True).data
+            }, status=status.HTTP_200_OK)
+        
         results = fetch_movies_from_tmdb(q)
 
         simplified = [
