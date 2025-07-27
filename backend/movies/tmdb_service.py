@@ -24,10 +24,10 @@ def serialize_tmdb_movie(movie_obj) -> dict:
         "title": getattr(movie_obj, "title", ""),
         "overview": getattr(movie_obj, "overview", ""),
         "poster_path": getattr(movie_obj, "poster_path", "") or "",
-        "release_year": _normalize_release_year(getattr(movie_obj, "release_date", "")),
+        "release_year": normalize_release_year(getattr(movie_obj, "release_date", "")),
     }
 
-def _normalize_release_year(release_date: str) -> int | None:
+def normalize_release_year(release_date: str) -> int | None:
     try:
         return int(release_date.split("-")[0]) if release_date else None
     except Exception:
