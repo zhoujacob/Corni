@@ -14,6 +14,7 @@ export default function MovieDetailsPage() {
         try {
             const res = await fetchMoviePreview(query);
             setResults(res.results || res);
+            console.log(res)
         } catch (err) {
             console.error("Search failed", err);
         }
@@ -42,6 +43,9 @@ export default function MovieDetailsPage() {
                     <h3 className={styles.movieTitle}>{movie.title}</h3>
                     <p className={styles.movieDate}>{movie.release_date}</p>
                     <p className={styles.movieOverview}>{movie.overview}</p>
+                    <p className={styles.movieOverview}>{movie.last_synced}</p>
+                    <p className={styles.movieOverview}>{movie.poster_path}</p>
+                    <p className={styles.movieOverview}>{movie.tmdb_id}</p>
                 </div>
                 ))}
             </div>
