@@ -1,5 +1,8 @@
+@import '../styles/colours.modules.css';
+
 .wrapper {
-  padding: 2rem;
+  background-color: var(--background);
+  color: var(--text);
 }
 
 .grid {

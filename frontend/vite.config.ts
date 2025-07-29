@@ -18,7 +18,6 @@ export default defineConfig(({ mode }) => {
         fs: {
             strict: false
         },
-        // This is the important part
         historyApiFallback: true
     },
 
@@ -26,7 +25,7 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist',
     },
     define: {
-      'process.env': env, // allows using process.env.MY_VAR
+      'process.env': env,
     }
   };
 });

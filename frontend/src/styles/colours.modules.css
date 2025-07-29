@@ -1,0 +1,8 @@
+:root {
+  --primary: #6556CD;     /* Soft purple */
+  --accent: #B6F09C;      /* Mint green */
+  --background: #F5F5F5;  /* Light gray background */
+  --text: #333333;        /* Dark text */
+  --white: #ffffff;
+  --border: #ddd;
+}
