@@ -62,23 +62,33 @@ class TMDbPreviewView(APIView):
             return Response({"detail": "Query param `q` is required."}, status=status.HTTP_400_BAD_REQUEST)
 
         local_matches = Movie.objects.filter(title__icontains=q).order_by("-last_synced")
-        if local_matches.exists():
-            return Response({
-                "source": "local",
-                "results": MovieSerializer(local_matches, many=True).data
-            }, status=status.HTTP_200_OK)
-        
-        results = fetch_movies_from_tmdb(q)
+        local_serialized = MovieSerializer(local_matches, many=True).data
 
-        simplified = [
-            {
-                "id": getattr(r, "id", None),
-                "title": getattr(r, "title", ""),
-                "overview": getattr(r, "overview", ""),
-                "poster_path": getattr(r, "poster_path", ""),
-                "release_date": getattr(r, "release_date", ""),
-            }
-            for r in results
-        ]
+        # Add 'source': 'local' to local results
+        results = [
+            {**movie, "source": "local"}
+            for movie in local_serialized
+        ][:4]
+    
+        if len(results) < 4:
+            tmdb_results = fetch_movies_from_tmdb(q)
+            # Collect tmdb_ids from local results to avoid duplicates
+            local_tmdb_ids = {movie.get("tmdb_id") or movie.get("id") for movie in results}
+            count_needed = 4 - len(results)
+            tmdb_simplified = []
+            for r in tmdb_results:
+                tmdb_id = getattr(r, "id", None)
+                if tmdb_id not in local_tmdb_ids:
+                    tmdb_simplified.append({
+                        "id": tmdb_id,
+                        "title": getattr(r, "title", ""),
+                        "overview": getattr(r, "overview", ""),
+                        "poster_path": getattr(r, "poster_path", ""),
+                        "release_date": getattr(r, "release_date", ""),
+                        "source": "tmdb"
+                    })
+                if len(tmdb_simplified) >= count_needed:
+                    break
+            results.extend(tmdb_simplified)
 
-        return Response(simplified, status=status.HTTP_200_OK)
+        return Response(results, status=status.HTTP_200_OK)

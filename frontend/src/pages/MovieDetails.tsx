@@ -1,54 +1,60 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "./MovieDetails.module.css";
 
 import { fetchMoviePreview } from "../api/movieApi"
 
+let debounceTimer: ReturnType<typeof setTimeout>;
 export default function MovieDetailsPage() {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
 
-    const handleSearch = async () => {
-        if (!query.trim()) return;
-        setLoading(true);
-        try {
-            const res = await fetchMoviePreview(query);
-            setResults(res.results || res);
-            console.log(res)
-        } catch (err) {
-            console.error("Search failed", err);
-        }
-        setLoading(false);
-    };
+    useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const response = await fetchMoviePreview(query);
+        const movies = Array.isArray(response) ? response : [];
+        setResults(movies);
+         
+      } catch {
+        setResults([])
+      } finally {
+        setLoading(false)
+      }
+    }, 400)
+  }, [query])
 
     return (
-        <div className={styles.container}>
+        <div className={styles.inputWrapper}>
             <input
                 type="text"
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Search for a movie..."
                 className={styles.input}
-                onKeyDown={e => e.key === "Enter" && handleSearch()}
+                onKeyDown={e => e.key === "Enter"}
             />
-            <button onClick={handleSearch} className={styles.button}>
-                Search
-            </button>
 
-            {loading && <p>Loading...</p>}
+            {loading && <p className={styles.loading}>Loading...</p>}
 
-            <div className={styles.results}>
-                {results.map((movie, idx) => (
-                <div key={idx} className={styles.movie}>
-                    <h3 className={styles.movieTitle}>{movie.title}</h3>
-                    <p className={styles.movieDate}>{movie.release_date}</p>
-                    <p className={styles.movieOverview}>{movie.overview}</p>
-                    <p className={styles.movieOverview}>{movie.last_synced}</p>
-                    <p className={styles.movieOverview}>{movie.poster_path}</p>
-                    <p className={styles.movieOverview}>{movie.tmdb_id}</p>
+            {results.length > 0 && (
+                <div className={styles.dropdown}>
+                    {results.map((movie) => (
+                    <div key={movie.tmdb_id} className={styles.movie}>
+                        <h3 className={styles.movieTitle}>{movie.title}</h3>
+                        <p className={styles.movieOverview}>{movie.release_date}</p>
+                    </div>
+                    ))}
                 </div>
-                ))}
-            </div>
+            )}
         </div>
+
     );
 }
