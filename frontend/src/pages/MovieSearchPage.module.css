@@ -32,13 +32,6 @@
   background-color: var(--accent);
   color: var(--text);
 }
-
-.loading {
-  margin-top: 0.5rem;
-  color: var(--charcoal);
-  font-size: 0.9rem;
-}
-
 .dropdown {
   position: absolute;
   top: 100%;

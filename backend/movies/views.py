@@ -80,7 +80,7 @@ class TMDbPreviewView(APIView):
                 tmdb_id = getattr(r, "id", None)
                 if tmdb_id not in local_tmdb_ids:
                     tmdb_simplified.append({
-                        "id": tmdb_id,
+                        "tmdb_id": tmdb_id,
                         "title": getattr(r, "title", ""),
                         "overview": getattr(r, "overview", ""),
                         "poster_path": getattr(r, "poster_path", ""),
@@ -92,3 +92,25 @@ class TMDbPreviewView(APIView):
             results.extend(tmdb_simplified)
 
         return Response(results, status=status.HTTP_200_OK)
+
+class MovieDetailView(APIView):
+    """
+    Retrieve a movie by its TMDb ID.
+    """
+    def get(self, request, tmdb_id):
+        try:
+            tmdb_id = int(tmdb_id)
+        except ValueError:
+            return Response({"detail": "tmdb_id must be an integer."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            movie = Movie.objects.get(tmdb_id=tmdb_id)
+            return Response(MovieSerializer(movie).data, status=status.HTTP_200_OK)
+        except Movie.DoesNotExist:
+            pass
+
+        movie = fetch_movie_by_id(tmdb_id)
+        if not movie:
+            return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        return Response(serialize_tmdb_movie(movie), status=status.HTTP_200_OK)

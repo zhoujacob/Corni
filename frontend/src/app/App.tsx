@@ -7,7 +7,9 @@ import { ROUTES } from './routes/path';
 
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
-import MovieDetailsPage from '../pages/MovieDetails';
+import MovieSearchPage from '../pages/MovieSearchPage';
+import PreviewMovie from '../features/movies/PreviewMovie';
+import MovieDetailPage from '../pages/MovieDetailPage';
 
 
 function App() {
@@ -29,10 +31,19 @@ function App() {
           path={ROUTES.MY_MOVIES}
           element={
             <RequireAuth>
-              <MovieDetailsPage />
+              <MovieSearchPage />
             </RequireAuth>
           }
         />
+        <Route
+          path={ROUTES.MOVIE_DETAIL}
+          element={
+            <RequireAuth>
+              <MovieDetailPage />
+            </RequireAuth>
+          }
+        />
+
       </Routes>
       <footer style={{ textAlign: 'center', padding: '1rem', fontSize: '0.9rem' }}>
         <p>

@@ -5,4 +5,5 @@ export const ROUTES = {
   MY_MOVIES: '/my-movies',
   RANKINGS: '/rankings',
   LOGIN: '/',
+  MOVIE_DETAIL: '/movies/:tmdb_id',
 };
