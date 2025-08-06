@@ -12,8 +12,6 @@ export default function MovieDetailPage() {
   const [movie, setMovie] = useState<Movie | null>(location.state?.movie || null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-
-  console.log("Enter")
   
   useEffect(() => {
     if (!movie && tmdb_id) {
