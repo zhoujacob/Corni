@@ -1,9 +1,13 @@
+from typing import TypedDict, cast
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from .tmdb_service import fetch_movie_by_id, serialize_tmdb_movie, fetch_movies_from_tmdb
-from .models import Movie
-from .serializers import MovieSerializer
+from rest_framework import status, viewsets, permissions
+from django.db.models import Avg, Count
+from .tmdb_service import fetch_movie_by_id, serialize_tmdb_movie, fetch_movies_from_tmdb, get_or_fetch_movie
+from .models import Movie, MovieRating
+from .serializers import MovieSerializer, MovieCompareSerializer, MovieLeaderboardItemSerializer
+from .elo import update_elo
+from .constants import DEFAULT_ELO, K_FACTOR, BAYES_PRIOR_M
 
 class MovieAddView(APIView):
     """
@@ -114,3 +118,102 @@ class MovieDetailView(APIView):
             return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(serialize_tmdb_movie(movie), status=status.HTTP_200_OK)
+
+# ELO RATING VIEWS
+class CompareData(TypedDict):
+    movie1_id: int
+    movie2_id: int
+    winner_id: int
+
+class MovieCompareView(APIView):
+    """
+    Submit a pairwise comparison between two movies for the current user and
+    update per-user Elo ratings. Accepts TMDb IDs.
+
+    Request Body (application/json):
+    {
+        "movie1_id": <int>,  # tmdb_id
+        "movie2_id": <int>,  # tmdb_id
+        "winner_id": <int>   # must equal movie1_id or movie2_id
+    }
+    """
+
+    def post(self, request):
+        serializer = MovieCompareSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = cast(CompareData, serializer.validated_data)
+        m1_id = data["movie1_id"]
+        m2_id = data["movie2_id"]
+        winner_id = data["winner_id"]
+
+        if m1_id == m2_id:
+            return Response({"detail": "movie1_id and movie2_id must differ"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if winner_id not in (m1_id, m2_id):
+            return Response({"detail": "winner_id must match movie1_id or movie2_id"}, status=status.HTTP_400_BAD_REQUEST)
+
+        movie1 = get_or_fetch_movie(m1_id)
+        movie2 = get_or_fetch_movie(m2_id)
+        if not movie1 or not movie2:
+            return Response({"detail": "One or both movies not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        # Get or create per-user ratings
+        r1, _ = MovieRating.objects.get_or_create(user=user, movie=movie1, defaults={"rating": DEFAULT_ELO})
+        r2, _ = MovieRating.objects.get_or_create(user=user, movie=movie2, defaults={"rating": DEFAULT_ELO})
+
+        score_a = 1.0 if winner_id == m1_id else 0.0
+        new_a, new_b = update_elo(r1.rating, r2.rating, score_a, k=K_FACTOR)
+
+        r1.rating = new_a
+        r2.rating = new_b
+        r1.save(update_fields=["rating", "updated"])
+        r2.save(update_fields=["rating", "updated"])
+
+        return Response({
+            "movie1": {"tmdb_id": movie1.tmdb_id, "rating": round(r1.rating, 2)},
+            "movie2": {"tmdb_id": movie2.tmdb_id, "rating": round(r2.rating, 2)}
+        }, status=status.HTTP_200_OK)
+
+
+class MovieLeaderboardView(APIView):
+    """
+    Global leaderboard across all users based on Elo ratings.
+    Returns average rating, rating count, and Bayesian-adjusted rating.
+
+    Query params:
+      - limit: max items to return (default 50)
+      - min_ratings: minimum number of ratings to include (default 1)
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request):
+        try:
+            limit = int(request.query_params.get("limit", 50))
+            min_ratings = int(request.query_params.get("min_ratings", 1))
+        except ValueError:
+            return Response({"detail": "limit and min_ratings must be integers"}, status=status.HTTP_400_BAD_REQUEST)
+
+        global_mean = MovieRating.objects.aggregate(avg=Avg("rating"))['avg'] or DEFAULT_ELO
+
+        qs = (
+            Movie.objects
+            .annotate(avg_rating=Avg("movie_ratings__rating"), num_ratings=Count("movie_ratings"))
+            .filter(num_ratings__gte=min_ratings)
+        )
+
+        # Compute Bayesian rating in Python, attach attribute for serializer
+        items = []
+        for m in qs:
+            avg = cast(float, getattr(m, 'avg_rating', DEFAULT_ELO) or DEFAULT_ELO)
+            n = cast(int, getattr(m, 'num_ratings', 0) or 0)
+            bayes = (BAYES_PRIOR_M * global_mean + n * avg) / (BAYES_PRIOR_M + n) if n >= 0 else avg
+            setattr(m, 'bayes_rating', bayes)
+            items.append(m)
+
+        # Sort by Bayesian rating desc, then by num_ratings desc
+        items.sort(key=lambda x: (getattr(x, 'bayes_rating', 0), x.num_ratings or 0), reverse=True)
+        items = items[:max(0, limit)]
+
+        data = MovieLeaderboardItemSerializer(items, many=True).data
+        return Response(data, status=status.HTTP_200_OK)

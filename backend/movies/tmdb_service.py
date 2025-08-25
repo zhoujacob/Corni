@@ -32,3 +32,18 @@ def normalize_release_year(release_date: str) -> int | None:
         return int(release_date.split("-")[0]) if release_date else None
     except Exception:
         return None
+
+def get_or_fetch_movie(tmdb_id: int) -> DjangoMovie | None:
+    """Return a Django Movie by TMDb id, fetching and caching if missing.
+
+    Returns None if the TMDb movie cannot be found.
+    """
+    try:
+        return DjangoMovie.objects.get(tmdb_id=tmdb_id)
+    except DjangoMovie.DoesNotExist:
+        movie = fetch_movie_by_id(tmdb_id)
+        if not movie:
+            return None
+        data = serialize_tmdb_movie(movie)
+        obj, _ = DjangoMovie.objects.update_or_create(tmdb_id=tmdb_id, defaults=data)
+        return obj
