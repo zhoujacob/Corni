@@ -9,6 +9,7 @@ from .serializers import MovieSerializer, MovieCompareSerializer, MovieLeaderboa
 from .elo import update_elo
 from .constants import DEFAULT_ELO, K_FACTOR, BAYES_PRIOR_M
 
+# MOVIE VIEWS
 class MovieAddView(APIView):
     """
     Adds a movie to the local database using a TMDb movie ID.
@@ -118,6 +119,29 @@ class MovieDetailView(APIView):
             return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
 
         return Response(serialize_tmdb_movie(movie), status=status.HTTP_200_OK)
+
+class MyMoviesView(APIView):
+    """
+    List all movies rated by the current user, along with their ratings.
+    """
+    def get(self, request):
+        user = request.user
+        # Order by highest Elo rating first, then most recently updated
+        ratings = (
+            MovieRating.objects
+            .filter(user=user)
+            .select_related('movie')
+            .order_by('-rating', '-updated')
+        )
+        data = [
+            {
+                "movie": MovieSerializer(rating.movie).data,
+                "rating": round(rating.rating, 2),
+                "updated": rating.updated
+            }
+            for rating in ratings
+        ]
+        return Response(data, status=status.HTTP_200_OK)
 
 # ELO RATING VIEWS
 class CompareData(TypedDict):

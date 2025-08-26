@@ -17,17 +17,22 @@ export default function DashboardPage() {
       <p>Hi {user.first_name}</p>
 
       <div className={styles.grid}>
-        <DashboardCard title="My Groups">
-          <p>View and manage your movie groups.</p>
-        </DashboardCard>
+        <Link to={ROUTES.RATE_MOVIES} className={styles.cleanLink}>
+          <DashboardCard title="Rate Movies">
+            <p>Rate movies you've watched!</p>
+          </DashboardCard>
+        </Link>
         <Link to={ROUTES.MY_MOVIES} className={styles.cleanLink}>
           <DashboardCard title="My Movies">
-            <p>Rate or review movies you've watched.</p>
+            <p>Review movies you've rated.</p>
           </DashboardCard>
         </Link>
         <DashboardCard title="Global Rankings">
           <p>Explore how movies rank globally across users.</p>
         </DashboardCard>
+        {/* <DashboardCard title="My Groups">
+          <p>View and manage your movie groups.</p>
+        </DashboardCard> */}
       </div>
     </div>
   );

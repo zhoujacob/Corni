@@ -8,8 +8,8 @@ import { ROUTES } from './routes/path';
 import LoginPage from '../pages/LoginPage';
 import DashboardPage from '../pages/DashboardPage';
 import MovieSearchPage from '../pages/MovieSearchPage';
-import PreviewMovie from '../features/movies/PreviewMovie';
 import MovieDetailPage from '../pages/MovieDetailPage';
+import MyMoviesPage from '../pages/MyMoviesPage';
 
 
 function App() {
@@ -29,6 +29,14 @@ function App() {
         />
         <Route
           path={ROUTES.MY_MOVIES}
+          element={
+            <RequireAuth>
+              <MyMoviesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path={ROUTES.RATE_MOVIES}
           element={
             <RequireAuth>
               <MovieSearchPage />

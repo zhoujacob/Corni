@@ -1,18 +1,22 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-function authHeaders() {
+// Ensure headers conform to the Fetch `HeadersInit` type
+function authHeaders(): HeadersInit {
   try {
     const token = localStorage.getItem('accessToken');
-    return token ? { Authorization: `Bearer ${token}` } : {};
+    if (token) {
+      return { Authorization: `Bearer ${token}` };
+    }
+    return {} as Record<string, string>;
   } catch {
-    return {};
+    return {} as Record<string, string>;
   }
 }
 
 export async function fetchMoviePreview(query: string) {
     const res = await fetch(
         `${BASE_URL}/api/movies/preview/?q=${encodeURIComponent(query)}`,
-        { headers: { ...authHeaders() } }
+        { headers: authHeaders() }
     );
 
     if (!res.ok)  {
@@ -22,10 +26,19 @@ export async function fetchMoviePreview(query: string) {
 }
 
 export async function fetchMovieDetails(tmdb_id: string) {
-    const res = await fetch(`${BASE_URL}/api/movies/${tmdb_id}/`, { headers: { ...authHeaders() } });
+    const res = await fetch(`${BASE_URL}/api/movies/${tmdb_id}/`, { headers: authHeaders() });
 
     if (!res.ok) {
         throw new Error('Failed to fetch movie details');
+    }
+    return res.json();
+}
+
+export async function fetchUserMovies() {
+    const res = await fetch(`${BASE_URL}/api/movies/user-movies/`, { headers: authHeaders() });
+
+    if (!res.ok) {
+        throw new Error('Failed to fetch user movies');
     }
     return res.json();
 }
