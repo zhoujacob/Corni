@@ -28,8 +28,7 @@ export async function devLogin(email: string): Promise<{ access: string; refresh
     const errorText = await res.text();
     throw new Error(`Dev login failed: ${errorText}`);
   }
-
-  // Backend returns { access, refresh, user }; we only need tokens here
+  
   const data = await res.json();
   return { access: data.access, refresh: data.refresh };
 }
