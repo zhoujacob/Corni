@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router';
+import { Routes, Route } from 'react-router-dom';
 import { useAuth } from '../features/auth/AuthContext';
 import RequireAuth from '../shared/RequireAuth';
 import Navbar from '../shared/Navbar';

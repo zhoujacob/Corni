@@ -7,7 +7,13 @@ import { fetchUserProfile } from '../../api/authApi';
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('accessToken');
+    } catch {
+      return null;
+    }
+  });
   const [user, setUser] = useState<User | null>(null)
 
   const isMock = import.meta.env.VITE_MOCK_AUTH === 'true';
@@ -41,6 +47,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setUser(null);
       });
   }, [accessToken, isMock]);
+
+  // Persist token to localStorage for convenience in dev
+  useEffect(() => {
+    try {
+      if (accessToken) localStorage.setItem('accessToken', accessToken);
+      else localStorage.removeItem('accessToken');
+    } catch {
+      // ignore storage errors
+    }
+  }, [accessToken]);
   console.log(user)
 
   return (

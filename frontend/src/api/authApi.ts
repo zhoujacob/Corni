@@ -17,6 +17,23 @@ export async function googleLogin(idToken: string): Promise<{ access: string; re
   return res.json();
 }
 
+export async function devLogin(email: string): Promise<{ access: string; refresh: string }> {
+  const res = await fetch(`${BASE_URL}/api/auth/dev/login-as/`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Dev login failed: ${errorText}`);
+  }
+
+  // Backend returns { access, refresh, user }; we only need tokens here
+  const data = await res.json();
+  return { access: data.access, refresh: data.refresh };
+}
+
 export async function fetchUserProfile(token: string): Promise<User> {
   const res = await fetch(`${BASE_URL}/api/auth/me/`, {
     headers: {

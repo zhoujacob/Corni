@@ -1,8 +1,18 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
+function authHeaders() {
+  try {
+    const token = localStorage.getItem('accessToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  } catch {
+    return {};
+  }
+}
+
 export async function fetchMoviePreview(query: string) {
     const res = await fetch(
-        `${BASE_URL}/api/movies/preview/?q=${encodeURIComponent(query)}`
+        `${BASE_URL}/api/movies/preview/?q=${encodeURIComponent(query)}`,
+        { headers: { ...authHeaders() } }
     );
 
     if (!res.ok)  {
@@ -12,7 +22,7 @@ export async function fetchMoviePreview(query: string) {
 }
 
 export async function fetchMovieDetails(tmdb_id: string) {
-    const res = await fetch(`${BASE_URL}/api/movies/${tmdb_id}/`);
+    const res = await fetch(`${BASE_URL}/api/movies/${tmdb_id}/`, { headers: { ...authHeaders() } });
 
     if (!res.ok) {
         throw new Error('Failed to fetch movie details');
