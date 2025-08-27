@@ -34,8 +34,8 @@ export async function fetchMovieDetails(tmdb_id: string) {
     return res.json();
 }
 
-export async function fetchUserMovies() {
-    const res = await fetch(`${BASE_URL}/api/movies/user-movies/`, { headers: authHeaders() });
+export async function fetchUserRatings() {
+    const res = await fetch(`${BASE_URL}/api/movies/ratings/`, { headers: authHeaders() });
 
     if (!res.ok) {
         throw new Error('Failed to fetch user movies');

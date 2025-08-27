@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import styles from './MyMoviesPage.module.css'
-import { fetchUserMovies } from '../api/movieApi'
+import { fetchUserRatings } from '../api/movieApi'
 import type { Movie, UserMovie } from '../types/movie'
 import { ROUTES } from '../app/routes/path'
 
@@ -18,7 +18,7 @@ export default function MyMoviesPage() {
   useEffect(() => {
     let active = true
     setLoading(true)
-    fetchUserMovies()
+    fetchUserRatings()
       .then((data) => {
         if (!active) return
         const arr = Array.isArray(data) ? data as UserMovie[] : []

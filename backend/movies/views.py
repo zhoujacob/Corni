@@ -120,7 +120,8 @@ class MovieDetailView(APIView):
 
         return Response(serialize_tmdb_movie(movie), status=status.HTTP_200_OK)
 
-class MyMoviesView(APIView):
+# USER RATINGS VIEWS
+class MyRatingsView(APIView):
     """
     List all movies rated by the current user, along with their ratings.
     """
@@ -143,6 +144,71 @@ class MyMoviesView(APIView):
         ]
         return Response(data, status=status.HTTP_200_OK)
 
+class RateMovieView(APIView):
+    """
+    Rate a movie for the current user using a TMDb ID and Elo rating.
+
+    Request Body (application/json):
+    {
+        "tmdb_id": <int>,
+        "rating": <float>  # Elo rating, typically between 100 and 3000
+    }
+    """
+    def post(self, request):
+        tmdb_id = request.data.get("tmdb_id")
+        rating = request.data.get("rating")
+
+        if tmdb_id is None or rating is None:
+            return Response({"detail": "tmdb_id and rating are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            tmdb_id = int(tmdb_id)
+            rating = float(rating)
+        except ValueError:
+            return Response({"detail": "tmdb_id must be an integer and rating must be a float."}, status=status.HTTP_400_BAD_REQUEST)
+
+        if rating < 100 or rating > 3000:
+            return Response({"detail": "rating must be between 100 and 3000."}, status=status.HTTP_400_BAD_REQUEST)
+
+        movie = get_or_fetch_movie(tmdb_id)
+        if not movie:
+            return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        user = request.user
+        obj, created = MovieRating.objects.update_or_create(
+            user=user,
+            movie=movie,
+            defaults={"rating": rating}
+        )
+
+        return Response({
+            "movie": MovieSerializer(movie).data,
+            "rating": round(obj.rating, 2),
+            "updated": obj.updated
+        }, status=status.HTTP_201_CREATED if created else status.HTTP_200_OK)
+
+# class DeleteMovieView(APIView):
+#     """
+#     Delete a user's rating for a movie by TMDb ID.
+#     """
+#     def delete(self, request, tmdb_id):
+#         try:
+#             tmdb_id = int(tmdb_id)
+#         except ValueError:
+#             return Response({"detail": "tmdb_id must be an integer."}, status=status.HTTP_400_BAD_REQUEST)
+
+#         try:
+#             movie = Movie.objects.get(tmdb_id=tmdb_id)
+#         except Movie.DoesNotExist:
+#             return Response({"detail": "Movie not found."}, status=status.HTTP_404_NOT_FOUND)
+
+#         user = request.user
+#         deleted, _ = MovieRating.objects.filter(user=user, movie=movie).delete()
+#         if deleted == 0:
+#             return Response({"detail": "No rating found to delete."}, status=status.HTTP_404_NOT_FOUND)
+
+#         return Response({"detail": "Rating deleted."}, status=status.HTTP_200_OK)
+    
 # ELO RATING VIEWS
 class CompareData(TypedDict):
     movie1_id: int
@@ -198,7 +264,6 @@ class MovieCompareView(APIView):
             "movie1": {"tmdb_id": movie1.tmdb_id, "rating": round(r1.rating, 2)},
             "movie2": {"tmdb_id": movie2.tmdb_id, "rating": round(r2.rating, 2)}
         }, status=status.HTTP_200_OK)
-
 
 class MovieLeaderboardView(APIView):
     """

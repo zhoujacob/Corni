@@ -7,7 +7,8 @@ from .views import (
     MovieDetailView,
     MovieCompareView,
     MovieLeaderboardView,
-    MyMoviesView,
+    MyRatingsView,
+    # DeleteMovieView
 )
 
 router = DefaultRouter()
@@ -16,7 +17,8 @@ router.register("", MovieViewSet, basename="movie")
 urlpatterns = [
     path("preview/", TMDbPreviewView.as_view(), name="tmdb-preview"),
     path("add/", MovieAddView.as_view(), name="movie-add"),
-    path("user-movies/", MyMoviesView.as_view(), name="user-movies"),
+    path("ratings/", MyRatingsView.as_view(), name="user-ratings"),
+    # path("ratings/<int:tmdb_id>/", DeleteMovieView.as_view(), name="my-rating-delete"),
     path("compare/", MovieCompareView.as_view(), name="movie-compare"),
     path("leaderboard/", MovieLeaderboardView.as_view(), name="movie-leaderboard"),
     path("<int:tmdb_id>/", MovieDetailView.as_view(), name="movie-detail"),
